@@ -1,0 +1,95 @@
+version: '2.1'
+services:
+  app-1:
+    image: zipkin/app_1
+    ports:
+      - 8081:8081
+    environment:
+      - ZIPKIN_SERVER=http://zipkin:9411/
+      - KAFKA_SERVER=kafka:9092
+      - APP_NAME=app_1
+      - PORT=8081
+      - KAFKA_TOPIC_1_NAME=kafka_topic_1
+    depends_on:
+      kafka:
+        condition: service_healthy
+  app-2:
+    image: zipkin/app_2
+    ports:
+      - 8082:8082
+    environment:
+      - ZIPKIN_SERVER=http://zipkin:9411/
+      - KAFKA_SERVER=kafka:9092
+      - APP_NAME=app_2
+      - PORT=8082
+      - KAFKA_TOPIC_1_NAME=kafka_topic_1
+      - KAFKA_TOPIC_2_NAME=kafka_topic_2
+    depends_on:
+      kafka:
+        condition: service_healthy
+  app-3:
+    image: zipkin/app_3
+    ports:
+      - 8083:8083
+    environment:
+      - ZIPKIN_SERVER=http://zipkin:9411/
+      - KAFKA_SERVER=kafka:9092
+      - APP_NAME=app_3
+      - PORT=8083
+      - APP4_SERVER=http://app-4:8084
+      - KAFKA_TOPIC_2_NAME=kafka_topic_2
+    depends_on:
+      kafka:
+        condition: service_healthy
+  app-4:
+    image: zipkin/app_4
+    ports:
+      - 8084:8084
+    environment:
+      - ZIPKIN_SERVER=http://zipkin:9411/
+      - APP_NAME=app_4
+      - PORT=8084
+      - APP5_SERVER=http://app-5:8085
+    depends_on:
+      kafka:
+        condition: service_healthy
+  app-5:
+    image: zipkin/app_5
+    ports:
+      - 8085:8085
+    environment:
+      - ZIPKIN_SERVER=http://zipkin:9411/
+      - APP_NAME=app_5
+      - PORT=8085
+    depends_on:
+      kafka:
+        condition: service_healthy
+  zipkin:
+    image: openzipkin/zipkin-slim
+    ports:
+      - "9411:9411"
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/zookeeper-3.4.13/bin/./zkServer.sh status || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_CREATE_TOPICS: "TOPIC_1:1:1,TOPIC_2:1:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --zookeeper zookeeper:2181 --list | grep 'TOPIC_' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
