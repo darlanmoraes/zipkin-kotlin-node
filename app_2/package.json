@@ -11,7 +11,7 @@
   "dependencies": {
     "express": "4.17.1",
     "kafkajs": "1.12.0",
-    "node-fetch": "2.6.0",
+    "node-fetch": "2.6.1",
     "zipkin": "0.22.0",
     "zipkin-context-cls": "0.22.0",
     "zipkin-instrumentation-kafkajs": "git://github.com/darlanmoraes/zipkin-instrumentation-kafkajs.git",
